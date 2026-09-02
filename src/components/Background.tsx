@@ -24,7 +24,6 @@ export default function Background() {
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-ink-900">
-      {/* 底色层次 */}
       <div
         className="absolute inset-0"
         style={{
@@ -34,21 +33,10 @@ export default function Background() {
             "linear-gradient(180deg, #0b111a 0%, #0a0f17 100%)",
         }}
       />
-      {/* 暖色辉光(朱砂 / 金 / 黛青) */}
-      <div
-        className="glow-orb"
-        style={{ width: 620, height: 620, left: "-8%", top: "-12%", background: "rgba(209, 80, 58, 0.10)" }}
-      />
-      <div
-        className="glow-orb"
-        style={{ width: 540, height: 540, right: "-10%", top: "22%", background: "rgba(201, 169, 98, 0.09)", animationDelay: "-6s" }}
-      />
-      <div
-        className="glow-orb"
-        style={{ width: 560, height: 560, left: "26%", bottom: "-18%", background: "rgba(127, 174, 155, 0.07)", animationDelay: "-12s" }}
-      />
+      <div className="glow-orb" style={{ width: 620, height: 620, left: "-8%", top: "-12%", background: "rgba(209, 80, 58, 0.10)" }} />
+      <div className="glow-orb" style={{ width: 540, height: 540, right: "-10%", top: "22%", background: "rgba(201, 169, 98, 0.09)", animationDelay: "-6s" }} />
+      <div className="glow-orb" style={{ width: 560, height: 560, left: "26%", bottom: "-18%", background: "rgba(127, 174, 155, 0.07)", animationDelay: "-12s" }} />
 
-      {/* 远景缓转星环 */}
       <svg className="absolute left-1/2 top-[8%] -translate-x-1/2 opacity-[0.05]" width="1100" height="1100" viewBox="0 0 1100 1100" aria-hidden>
         <g className="slow-ring">
           <circle cx="550" cy="550" r="520" fill="none" stroke="#c9a962" strokeWidth="1" strokeDasharray="4 14" />
@@ -59,23 +47,13 @@ export default function Background() {
         </g>
       </svg>
 
-      {/* 巨字水印 */}
-      <div
-        className="vertical-text absolute left-[1.2%] top-[16%] hidden select-none font-display text-[11rem] leading-none xl:block"
-        style={{ color: "rgba(201,169,98,0.045)" }}
-        aria-hidden
-      >
+      <div className="vertical-text absolute left-[1.2%] top-[16%] hidden select-none font-display text-[11rem] leading-none xl:block" style={{ color: "rgba(201,169,98,0.045)" }} aria-hidden>
         一陰一陽之謂道
       </div>
-      <div
-        className="vertical-text absolute right-[1.2%] top-[30%] hidden select-none font-display text-[11rem] leading-none xl:block"
-        style={{ color: "rgba(209,80,58,0.05)" }}
-        aria-hidden
-      >
+      <div className="vertical-text absolute right-[1.2%] top-[30%] hidden select-none font-display text-[11rem] leading-none xl:block" style={{ color: "rgba(209,80,58,0.05)" }} aria-hidden>
         生生之謂易
       </div>
 
-      {/* 浮尘 */}
       {dusts.map((d, i) => (
         <span
           key={i}

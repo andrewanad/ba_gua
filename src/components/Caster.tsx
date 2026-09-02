@@ -22,10 +22,8 @@ export default function Caster({ upper, lower, onUpper, onLower }: Props) {
     setRolling(true);
     let n = 0;
     timerRef.current = window.setInterval(() => {
-      const u = TRIGRAMS[Math.floor(Math.random() * 8)].id;
-      const l = TRIGRAMS[Math.floor(Math.random() * 8)].id;
-      onUpper(u);
-      onLower(l);
+      onUpper(TRIGRAMS[Math.floor(Math.random() * 8)].id);
+      onLower(TRIGRAMS[Math.floor(Math.random() * 8)].id);
       n++;
       if (n >= 14 && timerRef.current) {
         window.clearInterval(timerRef.current);
@@ -36,16 +34,14 @@ export default function Caster({ upper, lower, onUpper, onLower }: Props) {
   };
 
   const result = upper && lower ? HEXAGRAMS[`${upper}-${lower}`] : null;
-  const sixLines = upper && lower
-    ? [...TRIGRAM_MAP[lower].lines, ...TRIGRAM_MAP[upper].lines]
-    : null;
+  const sixLines = upper && lower ? [...TRIGRAM_MAP[lower].lines, ...TRIGRAM_MAP[upper].lines] : null;
 
   return (
     <section className="rounded-md border border-line bg-ink-800/75 p-5 shadow-[0_10px_40px_rgba(0,0,0,0.35)] backdrop-blur-[2px]">
       <header className="mb-4 flex items-center gap-3">
         <span className="seal-box text-lg">占</span>
         <div>
-          <h2 className="font-song text-lg font-bold text-paper">重卦起占</h2>
+          <h2 className="font-song text-lg font-bold text-paper">重卦推演</h2>
           <p className="text-[11px] tracking-widest text-dim">八经卦两两相重,得六十四卦</p>
         </div>
       </header>
@@ -83,7 +79,6 @@ export default function Caster({ upper, lower, onUpper, onLower }: Props) {
         ))}
       </div>
 
-      {/* 结果 */}
       <div className="mt-4 rounded-sm border border-line bg-ink-900/70 p-4">
         {!result || !sixLines ? (
           <p className="py-3 text-center text-xs leading-relaxed text-dim">
@@ -128,7 +123,7 @@ export default function Caster({ upper, lower, onUpper, onLower }: Props) {
             <circle cx="4.8" cy="9.2" r="1.1" fill="currentColor" stroke="none" />
           </svg>
         )}
-        {rolling ? "揲蓍演卦…" : "随机起卦"}
+        {rolling ? "推演中…" : "随机推演"}
       </button>
     </section>
   );

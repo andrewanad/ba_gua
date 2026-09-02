@@ -1,18 +1,15 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import Background from "./components/Background";
 import BaguaWheel from "./components/BaguaWheel";
 import DetailPanel from "./components/DetailPanel";
 import Caster from "./components/Caster";
 import HexagramGrid from "./components/HexagramGrid";
 import TrigramTable from "./components/TrigramTable";
+import DivinationModal from "./components/DivinationModal";
 import TrigramGlyph from "./components/TrigramGlyph";
 import Reveal from "./components/Reveal";
 import { TRIGRAM_MAP } from "./data/bagua";
-
-interface Toast {
-  key: number;
-  id: string;
-}
+import { computeDivination, type DivinationResult } from "./data/divination";
 
 function SectionHead({ no, title, sub }: { no: string; title: string; sub: string }) {
   return (
@@ -32,20 +29,23 @@ export default function App() {
   const [upper, setUpper] = useState<string | null>("kun");
   const [lower, setLower] = useState<string | null>("qian");
   const [hexKey, setHexKey] = useState<string | null>(null);
-  const [toast, setToast] = useState<Toast | null>(null);
+  const [divResult, setDivResult] = useState<DivinationResult | null>(null);
+  const [divSignal, setDivSignal] = useState(0);
+  const pendingRef = useRef<DivinationResult | null>(null);
 
-  useEffect(() => {
-    if (!toast) return;
-    const t = window.setTimeout(() => setToast(null), 4600);
-    return () => window.clearTimeout(t);
-  }, [toast]);
-
-  const handleDivine = (id: string) => {
-    setSelected(id);
-    setToast({ key: Date.now(), id });
+  const startDivination = () => {
+    pendingRef.current = computeDivination(new Date());
+    setDivResult(null);
+    setDivSignal((s) => s + 1);
   };
 
-  const toastTrigram = toast ? TRIGRAM_MAP[toast.id] : null;
+  const onSpinDone = () => {
+    const r = pendingRef.current;
+    if (r) {
+      setDivResult(r);
+      setHexKey(r.benKey); // 本卦同步到外环与卦图
+    }
+  };
 
   const navItems = [
     { href: "#pan", label: "八卦盘" },
@@ -65,16 +65,12 @@ export default function App() {
             <span className="seal-box h-9 w-9 text-xl">易</span>
             <span className="leading-tight">
               <span className="block font-display text-2xl text-paper">太极八卦</span>
-              <span className="block text-[10px] tracking-[0.3em] text-dim">互动演示 · 一阴一阳之谓道</span>
+              <span className="block text-[10px] tracking-[0.3em] text-dim">六十四卦 · 梅花六爻互动演示</span>
             </span>
           </a>
           <nav className="ml-auto hidden items-center gap-1 sm:flex">
             {navItems.map((n) => (
-              <a
-                key={n.href}
-                href={n.href}
-                className="rounded-sm px-3 py-2 text-sm text-sub transition-colors hover:bg-gold/10 hover:text-gold"
-              >
+              <a key={n.href} href={n.href} className="rounded-sm px-3 py-2 text-sm text-sub transition-colors hover:bg-gold/10 hover:text-gold">
                 {n.label}
               </a>
             ))}
@@ -92,23 +88,26 @@ export default function App() {
             </div>
             <h1 className="mt-2 font-display text-5xl leading-tight text-paper sm:text-6xl">
               八卦盘<span className="ml-3 align-middle font-song text-base font-normal tracking-widest text-dim">
-                两仪生四象 · 四象生八卦
+                四象生八卦 · 八卦定吉凶 · 吉凶生大业
               </span>
             </h1>
           </Reveal>
 
           <div className="mt-8 grid items-start gap-8 lg:grid-cols-12">
             <Reveal className="lg:col-span-7">
-              <BaguaWheel selected={selected} onSelect={setSelected} onDivine={handleDivine} />
+              <BaguaWheel
+                selected={selected}
+                onSelect={setSelected}
+                hexKey={hexKey}
+                onSelectHex={setHexKey}
+                onDivineClick={startDivination}
+                divineSignal={divSignal}
+                onDivineSpinDone={onSpinDone}
+              />
             </Reveal>
             <div className="flex flex-col gap-6 lg:col-span-5">
               <Reveal delay={120}>
-                <DetailPanel
-                  selected={selected}
-                  onSelect={setSelected}
-                  onSetUp={setUpper}
-                  onSetLower={setLower}
-                />
+                <DetailPanel selected={selected} onSelect={setSelected} onSetUp={setUpper} onSetLower={setLower} />
               </Reveal>
               <Reveal delay={220}>
                 <Caster upper={upper} lower={lower} onUpper={setUpper} onLower={setLower} />
@@ -125,10 +124,7 @@ export default function App() {
             sub="八经卦各领一类物象:自然、五行、方位、人伦、身体、禽兽、色、德,触类旁通,皆可为占。点击行可回卦盘细看。"
           />
           <Reveal delay={100}>
-            <TrigramTable
-              selected={selected}
-              onSelect={(id) => setSelected(id)}
-            />
+            <TrigramTable selected={selected} onSelect={(id) => setSelected(id)} />
           </Reveal>
         </section>
 
@@ -137,7 +133,7 @@ export default function App() {
           <SectionHead
             no="其三 · 重卦成易"
             title="六十四卦"
-            sub="上下两经卦相叠,三爻变六爻,八八六十四卦尽天下之变。方图一屏览全,悬停即见卦名卦义。"
+            sub="上下两经卦相叠,三爻变六爻,八八六十四卦尽天下之变。卦盘外环即为六十四卦圆图,与此方图同源联动。"
           />
           <Reveal delay={100}>
             <HexagramGrid hexKey={hexKey} onHexKey={setHexKey} selected={selected} />
@@ -160,7 +156,7 @@ export default function App() {
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-sub">
                   相传<span className="text-gold">伏羲画先天八卦</span>,乾南坤北、离东坎西,两两相对,阴阳均衡,
-                  描摹的是天地未形之「体」; <span className="text-gold">文王演后天八卦</span>,坎离代乾坤而居南北,
+                  描摹的是天地未形之「体」;<span className="text-gold">文王演后天八卦</span>,坎离代乾坤而居南北,
                   配四时、应八方,说的是万物既生之「用」。故曰:先天为体,后天为用。
                 </p>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -196,7 +192,7 @@ export default function App() {
                   </div>
                 </div>
                 <p className="mt-4 border-l-2 border-gold/50 pl-3 text-xs leading-relaxed text-dim">
-                  在卦盘中切换「先天 / 后天」,可见八卦易位重排——乾坤退隐,坎离当权,恰是体用之别的直观一课。
+                  在卦盘中切换「先天 / 后天」,可见八卦与六十四卦外环同时易位重排——乾坤退隐,坎离当权,恰是体用之别的直观一课。
                 </p>
               </div>
             </Reveal>
@@ -217,10 +213,10 @@ export default function App() {
                     example: { a: "kun", b: "qian", label: "泰 ⇄ 否" },
                   },
                   {
-                    seal: "重",
-                    title: "重卦 · 内外相叠",
-                    body: "下卦为内、为己,上卦为外、为事。内健而外顺,方成地天泰。",
-                    example: { a: "li", b: "kan", label: "既济 · 上坎下离" },
+                    seal: "占",
+                    title: "梅花 + 六爻",
+                    body: "梅花易数以数起卦、以体用生克为断;六爻纳甲装卦、以六亲世应为凭。本站占筮合二者而用之。",
+                    example: { a: "li", b: "kan", label: "数起卦 · 爻断事" },
                   },
                 ].map((c) => {
                   const exA = TRIGRAM_MAP[c.example.a];
@@ -249,57 +245,25 @@ export default function App() {
       {/* ===== 页脚 ===== */}
       <footer className="mt-24 border-t border-line/70">
         <Reveal className="mx-auto max-w-3xl px-5 py-14 text-center">
-          <svg className="mx-auto mb-5 taiji-glow" width="54" height="54" viewBox="0 0 100 100" aria-hidden>
+          <svg className="taiji-glow mx-auto mb-5" width="54" height="54" viewBox="0 0 100 100" aria-hidden>
             <circle cx="50" cy="50" r="47" fill="#101826" stroke="#7d6a42" strokeWidth="2" />
             <path d="M50,4 A46,46 0 0 1 50,96 A23,23 0 0 1 50,50 A23,23 0 0 0 50,4 Z" fill="#efe6d0" />
             <circle cx="50" cy="27" r="6" fill="#101826" />
             <circle cx="50" cy="73" r="6" fill="#efe6d0" />
           </svg>
           <p className="font-display text-2xl leading-relaxed text-paper sm:text-3xl">
-            「易有太极,是生两仪;
+            「是故君子居则观其象而玩其辞,
             <br />
-            两仪生四象,四象生八卦。」
+            动则观其变而玩其占。」
           </p>
           <p className="mt-3 font-song text-sm text-gold">——《周易 · 系辞上》</p>
           <p className="mt-6 text-[11px] tracking-widest text-dim">
-            太极八卦互动演示 · 方位依古图南下北上 · 卦辞简解仅供玩味
+            太极八卦互动演示 · 方位依古图南下北上 · 占断仅供文化研习
           </p>
         </Reveal>
       </footer>
 
-      {/* ===== 占卜结果浮窗 ===== */}
-      {toastTrigram && toast && (
-        <div
-          key={toast.key}
-          className="toast-in fixed bottom-6 left-1/2 z-50 flex w-[min(92vw,420px)] items-center gap-4 rounded-md border border-gold/50 bg-ink-800/95 p-4 shadow-[0_16px_60px_rgba(0,0,0,0.6),0_0_30px_rgba(201,169,98,0.15)]"
-          role="status"
-        >
-          <div className="relative flex h-16 w-16 flex-none items-center justify-center">
-            <span className="absolute inset-0 rounded-sm border-2 border-cinn/70" style={{ background: "linear-gradient(150deg, rgba(209,80,58,0.22), rgba(209,80,58,0.06))" }} />
-            <span className="font-display text-4xl text-cinnbright">{toastTrigram.char}</span>
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-2">
-              <span className="rounded-sm bg-cinn px-1.5 py-0.5 text-[10px] font-bold text-[#f7f1e2]">得卦</span>
-              <span className="font-song text-lg font-bold text-paper">
-                {toastTrigram.char}卦 · {toastTrigram.nature}
-              </span>
-            </div>
-            <p className="mt-1 text-xs leading-relaxed text-sub">
-              其德在「{toastTrigram.virtue}」,应{toastTrigram.direction}之位 —— {toastTrigram.desc.slice(0, 30)}…
-            </p>
-          </div>
-          <button
-            onClick={() => setToast(null)}
-            className="ml-auto flex-none text-dim transition-colors hover:text-paper"
-            aria-label="关闭"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="1.6">
-              <path d="M2 2 L12 12 M12 2 L2 12" />
-            </svg>
-          </button>
-        </div>
-      )}
+      {divResult && <DivinationModal result={divResult} onClose={() => setDivResult(null)} onAgain={startDivination} />}
     </div>
   );
 }

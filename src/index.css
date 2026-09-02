@@ -99,7 +99,7 @@ body {
   pointer-events: none;
   opacity: 0.05;
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3E/svg%3E");
 }
 
 .vertical-text {
@@ -109,6 +109,7 @@ body {
 }
 
 /* ---------- 八卦盘节点 ---------- */
+.bnode { cursor: pointer; }
 .bnode-inner {
   transform-box: fill-box;
   transform-origin: center;
@@ -182,3 +183,20 @@ input[type="range"].speed-range::-moz-range-thumb {
 .tr-row { transition: background-color 0.2s; }
 .tr-row:hover { background: rgba(201, 169, 98, 0.07); }
 .tr-row.active { background: rgba(209, 80, 58, 0.12); }
+
+/* ---------- 六十四卦环单元 ---------- */
+.hexnode { cursor: pointer; }
+.hexnode .hexbar rect,
+.hexnode rect.hexbar { transition: fill 0.18s; }
+.hexnode:hover .hexbar rect,
+.hexnode:hover rect.hexbar { fill: #efe6d0; }
+
+/* ---------- 占断弹窗 ---------- */
+@keyframes backdropFade { from { opacity: 0; } to { opacity: 1; } }
+.backdrop-in { animation: backdropFade 0.3s ease both; }
+
+@keyframes modalRise {
+  from { opacity: 0; transform: translateY(36px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-in { animation: modalRise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }

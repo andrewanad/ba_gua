@@ -19,7 +19,6 @@ export default function TrigramGlyph({ lines, size = 36, color = "currentColor",
   return (
     <svg width={size} height={h} viewBox={`0 0 ${size} ${h}`} className={className} aria-hidden>
       {lines.map((kind, idx) => {
-        // lines[0] 为最下爻,绘制时最下爻 y 最大
         const y = h - (idx + 1) * LINE_H - idx * GAP;
         return kind === "yang" ? (
           <rect key={idx} x={0} y={y} width={size} height={LINE_H} rx={1} fill={color} />
